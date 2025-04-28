@@ -8,18 +8,14 @@ import (
 
 var DB *gorm.DB
 
-// Инициализация DB
 func InitHandlers(db *gorm.DB) {
 	DB = db
 }
 
-// Получение разделов с подгруженными темами
 func GetSections(c *fiber.Ctx) error {
 	var sections []models.Section
-	// Добавление Preload для загрузки связанных данных (например, Topics)
 	if err := DB.Preload("Topics").Find(&sections).Error; err != nil {
-		// Логируем ошибку на сервере
-		c.Locals("error", err) // Можно использовать локальные данные для логирования
+		c.Locals("error", err)
 		return c.Status(500).JSON(fiber.Map{"error": "Ошибка при получении разделов", "details": err.Error()})
 	}
 

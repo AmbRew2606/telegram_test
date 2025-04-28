@@ -1,4 +1,3 @@
-// pkg/storage/postgres.go
 package storage
 
 import (

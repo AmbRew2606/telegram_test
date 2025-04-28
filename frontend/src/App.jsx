@@ -1,27 +1,31 @@
 import { useNavigate } from 'react-router-dom'
-import Header from './components/Header'; // хедер
-import './App.css'
+import Sidebar from './components/Sidebar'; // хедер
+// import './App.css'
+
+import './styles/main.scss' //стили
 
 function App() {
   const navigate = useNavigate()
 
   return (
     <>
-      <Header /> 
-    <div style={{ padding: '2rem', textAlign: 'center' }}>
-      <h1>Главная страница</h1>
-      <button
-        style={{
-          marginTop: '2rem',
-          padding: '1rem 2rem',
-          fontSize: '1.2rem',
-          cursor: 'pointer',
-        }}
-        onClick={() => navigate('/sections')}
-      >
-        Посмотреть все разделы и темы
-      </button>
-    </div>
+      <Sidebar /> 
+    <main>
+      <div style={{ padding: '32px 90px'}}>
+        <h1>Главная страница</h1>
+        <button
+          style={{
+            marginTop: '2rem',
+            padding: '1rem 2rem',
+            fontSize: '1.2rem',
+            cursor: 'pointer',
+          }}
+          onClick={() => navigate('/sections')}
+        >
+          Посмотреть все разделы и темы
+        </button>
+      </div>
+    </main>
     </>
   )
 }
