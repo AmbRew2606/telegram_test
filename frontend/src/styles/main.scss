@@ -1,4 +1,7 @@
+//компоненты
 @use  '../components/Sidebar.scss';
+//страницы
+@use '../pages/Sections.scss';
 
 
 h1 {
@@ -8,7 +11,12 @@ h1 {
     margin: unset;
 }
 
+h2, li {
+    color: #111111;
+}
+
 body {
+    background: #EBEBEB;
     margin: 0;
     padding: 0;
     font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -18,8 +26,14 @@ body {
     color: white;
 }
 
+#root {
+    display: flex;
+    min-height: 100vh;
+}
+
 main {
-    max-width: 1200px;
+    flex: 1;
+    // max-width: 1200px;
     width: 100%;
     // margin: auto;
     margin-left: 15.6em;

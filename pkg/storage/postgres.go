@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/AmbRew2606/telegram_test/pkg/models"
-
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
