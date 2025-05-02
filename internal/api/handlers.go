@@ -43,16 +43,19 @@ func GetSectionStats(c *fiber.Ctx) error {
 // Нужно расширить запрос, чтобы также можно было добавить темы
 func CreateSection(c *fiber.Ctx) error {
 	var req struct {
-		Name string `json:"name"`
+		Name   string   `json:"name"`
+		Topics []string `json:"topics"` // Добавляем поле для тем
 	}
 
+	// Парсим тело запроса
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Неверный формат данных",
 		})
 	}
 
-	section, err := sectionService.CreateSection(req.Name)
+	// Создаем раздел с темами
+	section, err := sectionService.CreateSection(req.Name, req.Topics)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Ошибка при создании раздела",

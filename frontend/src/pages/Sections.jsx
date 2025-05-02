@@ -6,6 +6,7 @@ import '../components/Modal.scss';
 function Sections() {
   const [sections, setSections] = useState([]);
   const [newSectionName, setNewSectionName] = useState('');
+  const [newTopics, setNewTopics] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [activeSectionId, setActiveSectionId] = useState(null);
   const [errorMessage, setErrorMessage] = useState(''); 
@@ -31,21 +32,31 @@ function Sections() {
       return;
     }
 
-    setErrorMessage(''); 
+    setErrorMessage(''); // очистка ошибки 
+
+
+    const topicsArray = newTopics.split(',').map(topic => topic.trim()).filter(Boolean); // преобразование стрки тем в массив
+
+    const sectionData = {
+      name: newSectionName,
+      topics: topicsArray // добавление темы в данные
+    };
 
     fetch('http://localhost:8081/api/sections', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: newSectionName }),
+      body: JSON.stringify(sectionData),
     })
       .then(res => res.json())
       .then(data => {
         setSections(prev => [...prev, data]);
         setNewSectionName('');
+        setNewTopics(''); // очистка темы
         setShowModal(false);
       })
       .catch(err => console.error('Ошибка добавления:', err));
   };
+
 
   const toggleSection = (id) => {
     setActiveSectionId(prev => (prev === id ? null : id));
@@ -117,6 +128,21 @@ function Sections() {
                   value={newSectionName}
                   onChange={(e) => setNewSectionName(e.target.value)}
                   placeholder="Название нового раздела"
+                  style={{
+                    width: '100%',
+                    padding: '1rem',
+                    marginBottom: '1rem',
+                    borderRadius: '8px',
+                    border: 'none',
+                    height: '45px',
+                    boxSizing: 'border-box',
+                  }}
+                />
+                 <input
+                  type="text"
+                  value={newTopics}
+                  onChange={(e) => setNewTopics(e.target.value)}
+                  placeholder="Введите темы через запятую"
                   style={{
                     width: '100%',
                     padding: '1rem',

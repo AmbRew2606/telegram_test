@@ -21,11 +21,21 @@ func NewSectionService(db *gorm.DB) *SectionService {
 	return &SectionService{DB: db}
 }
 
-func (s *SectionService) CreateSection(name string) (*models.Section, error) {
+func (s *SectionService) CreateSection(name string, topics []string) (*models.Section, error) {
+	// Создание раздела
 	section := &models.Section{Name: name}
 	if err := s.DB.Create(section).Error; err != nil {
 		return nil, err
 	}
+
+	// Создание тем для раздела
+	for _, topicName := range topics {
+		topic := &models.Topic{Name: topicName, SectionID: section.ID}
+		if err := s.DB.Create(topic).Error; err != nil {
+			return nil, err
+		}
+	}
+
 	return section, nil
 }
 
