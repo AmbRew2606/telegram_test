@@ -2,7 +2,9 @@
     background: #333333;
     padding: 2rem;
     border-radius: 8px;
-    min-width: 300px;
+    max-width: 500px;
+    width: 100%;
+    box-sizing: border-box;
 
     h2{
         color: #ffffff;
@@ -18,3 +20,4 @@
         color: #E44242;
     }
 }
+
