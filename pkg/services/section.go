@@ -5,12 +5,17 @@ import (
 	"gorm.io/gorm"
 )
 
-// for page /sections
 type SectionStats struct {
 	ID        uint   `json:"id"`        // ID раздела
 	Name      string `json:"name"`      // Название раздела
 	Topics    int    `json:"topics"`    // Количество тем
 	Questions int    `json:"questions"` // Количество вопросов
+}
+
+type TopicInfo struct {
+	ID             uint   `json:"id"`
+	Name           string `json:"name"`
+	QuestionsCount int    `json:"questions"`
 }
 
 type SectionService struct {
@@ -22,13 +27,11 @@ func NewSectionService(db *gorm.DB) *SectionService {
 }
 
 func (s *SectionService) CreateSection(name string, topics []string) (*models.Section, error) {
-	// Создание раздела
 	section := &models.Section{Name: name}
 	if err := s.DB.Create(section).Error; err != nil {
 		return nil, err
 	}
 
-	// Создание тем для раздела
 	for _, topicName := range topics {
 		topic := &models.Topic{Name: topicName, SectionID: section.ID}
 		if err := s.DB.Create(topic).Error; err != nil {
@@ -49,10 +52,9 @@ func (s *SectionService) GetAllSectionsWithTopics() ([]models.Section, error) {
 
 func (s *SectionService) GetSectionStats() ([]SectionStats, error) {
 	var stats []SectionStats
-
 	query := `
 	SELECT 
-	  s.id AS id,           -- ID раздела
+	  s.id AS id,          
 	  s.name AS name, 
 	  COUNT(DISTINCT t.id) AS topics, 
 	  COUNT(q.id) AS questions
@@ -61,10 +63,44 @@ func (s *SectionService) GetSectionStats() ([]SectionStats, error) {
 	LEFT JOIN questions q ON t.id = q.topic_id
 	GROUP BY s.id, s.name;
 	`
-
 	if err := s.DB.Raw(query).Scan(&stats).Error; err != nil {
 		return nil, err
 	}
-
 	return stats, nil
+}
+
+func (s *SectionService) GetTopicsBySectionID(sectionID uint) ([]TopicInfo, error) {
+	var topics []TopicInfo
+	query := `
+	SELECT 
+		t.id AS id,
+		t.name AS name,
+		COUNT(q.id) AS questions_count
+	FROM topics t
+	LEFT JOIN questions q ON t.id = q.topic_id
+	WHERE t.section_id = ?
+	GROUP BY t.id, t.name;
+	`
+	if err := s.DB.Raw(query, sectionID).Scan(&topics).Error; err != nil {
+		return nil, err
+	}
+	return topics, nil
+}
+
+func (s *SectionService) GetFilteredTopics(sectionID uint, filter string) ([]TopicInfo, error) {
+	var topics []TopicInfo
+	query := `
+	SELECT 
+		t.id AS id,
+		t.name AS name,
+		COUNT(q.id) AS questions_count
+	FROM topics t
+	LEFT JOIN questions q ON t.id = q.topic_id
+	WHERE t.section_id = ? AND t.name LIKE ?
+	GROUP BY t.id, t.name;
+	`
+	if err := s.DB.Raw(query, sectionID, "%"+filter+"%").Scan(&topics).Error; err != nil {
+		return nil, err
+	}
+	return topics, nil
 }

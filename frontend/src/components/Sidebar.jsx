@@ -14,7 +14,7 @@ function Sidebar() {
         <nav className="sidebar__nav">
             <Link to="/" className="sidebar__link">Главная</Link>
             <Link to="/sections" className="sidebar__link">Разделы</Link>
-            <Link to="/sections" className="sidebar__link">Темы</Link>
+            <Link to="/topics" className="sidebar__link">Темы</Link>
             <Link to="/sections" className="sidebar__link">Вопросы</Link>
             <Link to="/sections" className="sidebar__link">Настройки</Link>
         </nav>
