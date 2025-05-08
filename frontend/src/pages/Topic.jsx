@@ -40,13 +40,21 @@ const Topic = () => {
         <h1>Темы</h1>
 
         <div style={{ marginBottom: "20px" }}>
-            <label htmlFor="section-select">Выбери раздел: </label>
-            <select
+            <h2>Выбери раздел: </h2>
+
+
+            <select style={{
+                    width: '100%',
+                    padding: '1rem',
+                    borderRadius: '8px',
+                    border: 'none'
+            }}
             id="section-select"
             value={selectedSection}
             onChange={(e) => setSelectedSection(e.target.value)}
             >
             <option value="">-- Выбери --</option>
+
             {sections.map((s) => (
                 <option key={s.id} value={s.id}>
                 {s.name}
@@ -61,13 +69,53 @@ const Topic = () => {
             <p>В разделе нету тем!</p> 
         )}
 
-        <ul>
+        {/* <ul>
             {topics.map((topic) => (
             <li key={topic.id}>
                 <strong>{topic.name}</strong> — {topic.questions} вопрос(ов)
             </li>
             ))}
-        </ul>
+        </ul> */}
+        <div className="topic__conteiner">
+        {topics.map((topic) => (
+            <div key={topic.id} style={{
+                background: '#fff',
+                color: '#111',
+                fontWeight: '500',
+                maxWidth: '340px',
+                height: '200px',
+                padding: '2rem',
+                boxSizing: 'border-box',
+                borderRadius: '8px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between'
+            }}>
+                <div>
+                    <span>{topic.name}</span>
+                </div>
+                <div>
+                    <span>Вопросы: </span><span>{topic.questions}</span>
+                </div>
+                
+                
+                {/* <strong>{topic.name}</strong> — {topic.questions} вопрос(ов) */}
+            </div>
+            ))}
+                      <div className="section__add">
+            <div className="icon-hover">
+              <svg xmlns="http://www.w3.org/2000/svg" width="35" height="100%" viewBox="0 0 35 35" fill="none">
+                <line x1="17.7195" y1="6.8291" x2="17.7195" y2="28.1706" stroke="#AFAFAF" strokeWidth="3" />
+                <line x1="6.82935" y1="17.2803" x2="28.1708" y2="17.2803" stroke="#AFAFAF" strokeWidth="3" />
+                <circle cx="17.5" cy="17.5" r="17" stroke="#AFAFAF" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+
+
+
         </div>
         </div>
         </main>

@@ -6,16 +6,28 @@ import (
 )
 
 type SectionStats struct {
-	ID        uint   `json:"id"`        // ID раздела
-	Name      string `json:"name"`      // Название раздела
-	Topics    int    `json:"topics"`    // Количество тем
-	Questions int    `json:"questions"` // Количество вопросов
+	ID        uint   `json:"id"`
+	Name      string `json:"name"`
+	Topics    int    `json:"topics"`
+	Questions int    `json:"questions"`
 }
 
 type TopicInfo struct {
 	ID             uint   `json:"id"`
 	Name           string `json:"name"`
 	QuestionsCount int    `json:"questions"`
+}
+
+type AnswerInfo struct {
+	ID        uint   `json:"id"`
+	Text      string `json:"text"`
+	IsCorrect bool   `json:"is_correct"`
+}
+
+type QuestionInfo struct {
+	ID      uint         `json:"id"`
+	Text    string       `json:"text"`
+	Answers []AnswerInfo `json:"answers" gorm:"-"`
 }
 
 type SectionService struct {
@@ -102,5 +114,52 @@ func (s *SectionService) GetFilteredTopics(sectionID uint, filter string) ([]Top
 	if err := s.DB.Raw(query, sectionID, "%"+filter+"%").Scan(&topics).Error; err != nil {
 		return nil, err
 	}
+
+	if topics == nil {
+		topics = []TopicInfo{}
+	}
+
 	return topics, nil
+}
+
+// func (s *SectionService) GetQuestions(sectionID, topicID uint) ([]QuestionInfo, error) {
+// 	var questions []QuestionInfo
+
+// 	query := `
+//     SELECT
+//         q.id, q.text
+//     FROM questions q
+//     INNER JOIN topics t ON q.topic_id = t.id
+//     WHERE t.section_id = ? AND q.topic_id = ?
+//     `
+// 	if err := s.DB.Raw(query, sectionID, topicID).Scan(&questions).Error; err != nil {
+// 		return nil, err
+// 	}
+
+// 	return questions, nil
+// }
+
+func (s *SectionService) GetQuestions(sectionID, topicID uint) ([]QuestionInfo, error) {
+	var questions []QuestionInfo
+
+	query := `
+	SELECT q.id, q.text
+	FROM questions q
+	JOIN topics t ON q.topic_id = t.id
+	WHERE t.section_id = ? AND q.topic_id = ?
+	`
+	if err := s.DB.Raw(query, sectionID, topicID).Scan(&questions).Error; err != nil {
+		return nil, err
+	}
+
+	for i := range questions {
+		var answers []AnswerInfo
+		err := s.DB.Raw(`SELECT id, text, is_correct FROM answers WHERE question_id = ?`, questions[i].ID).Scan(&answers).Error
+		if err != nil {
+			return nil, err
+		}
+		questions[i].Answers = answers
+	}
+
+	return questions, nil
 }

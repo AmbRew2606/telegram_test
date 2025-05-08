@@ -5,6 +5,7 @@ import App from './App.jsx'
 
 import Sections from './pages/Sections.jsx';
 import Topic from './pages/Topic.jsx';
+import Questions from './pages/Questions.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -13,6 +14,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/" element={<App />} />
         <Route path="/sections" element={<Sections />} />
         <Route path="/topics" element={<Topic />} />
+        <Route path="/questions" element={<Questions />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>,

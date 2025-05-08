@@ -44,7 +44,7 @@ func GetSectionStats(c *fiber.Ctx) error {
 func CreateSection(c *fiber.Ctx) error {
 	var req struct {
 		Name   string   `json:"name"`
-		Topics []string `json:"topics"` // Добавляем поле для тем
+		Topics []string `json:"topics"`
 	}
 
 	if err := c.BodyParser(&req); err != nil {
@@ -65,7 +65,7 @@ func CreateSection(c *fiber.Ctx) error {
 
 // Темы по ID раздела
 func GetTopicsBySectionID(c *fiber.Ctx) error {
-	sectionIDParam := c.Params("sectionId")
+	sectionIDParam := c.Query("sectionId")
 	sectionID, err := strconv.Atoi(sectionIDParam)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid sectionId"})
@@ -77,25 +77,47 @@ func GetTopicsBySectionID(c *fiber.Ctx) error {
 	}
 
 	if topics == nil {
-		topics = make([]services.TopicInfo, 0)
+		topics = []services.TopicInfo{}
 	}
 
 	return c.JSON(topics)
 }
 
 func GetFilteredTopics(c *fiber.Ctx) error {
-	sectionIDParam := c.Query("sectionId")
-	filter := c.Query("filter", "")
-
-	sectionID, err := strconv.Atoi(sectionIDParam)
+	sectionID, err := strconv.Atoi(c.Query("sectionId"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid sectionId"})
 	}
+
+	filter := c.Query("filter", "")
 
 	topics, err := sectionService.GetFilteredTopics(uint(sectionID), filter)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Не удалось получить темы"})
 	}
 
+	if topics == nil {
+		topics = []services.TopicInfo{}
+	}
+
 	return c.JSON(topics)
+}
+
+func GetQuestionsHandler(c *fiber.Ctx) error {
+	sectionID, err1 := strconv.Atoi(c.Query("sectionId"))
+	topicID, err2 := strconv.Atoi(c.Query("topicId"))
+	if err1 != nil || err2 != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid sectionId or topicId"})
+	}
+
+	questions, err := sectionService.GetQuestions(uint(sectionID), uint(topicID))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Не удалось получить вопросы"})
+	}
+
+	if questions == nil {
+		questions = []services.QuestionInfo{}
+	}
+
+	return c.JSON(questions)
 }
