@@ -3,10 +3,23 @@ package api
 import (
 	"strconv"
 
+	"github.com/AmbRew2606/telegram_test/pkg/models"
 	"github.com/AmbRew2606/telegram_test/pkg/services"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
+
+type CreateQuestionInput struct {
+	SectionID uint          `json:"section_id"`
+	TopicID   uint          `json:"topic_id"`
+	Text      string        `json:"text"`
+	Answers   []AnswerInput `json:"answers"`
+}
+
+type AnswerInput struct {
+	Text      string `json:"text"`
+	IsCorrect bool   `json:"is_correct"`
+}
 
 var sectionService *services.SectionService
 
@@ -120,4 +133,79 @@ func GetQuestionsHandler(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(questions)
+}
+
+func AddQuestionHandler(c *fiber.Ctx) error {
+	var input CreateQuestionInput
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Невалидный JSON"})
+	}
+
+	if input.Text == "" || len(input.Answers) < 2 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Вопрос и хотя бы два ответа обязательны"})
+	}
+
+	hasCorrect := false
+	for _, a := range input.Answers {
+		if a.IsCorrect {
+			hasCorrect = true
+			break
+		}
+	}
+	if !hasCorrect {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Хотя бы один ответ должен быть правильным"})
+	}
+
+	var exists bool
+	err := sectionService.DB.Raw(`
+		SELECT EXISTS(
+			SELECT 1 FROM topics WHERE id = ? AND section_id = ?
+		)`, input.TopicID, input.SectionID).Scan(&exists).Error
+	if err != nil || !exists {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Такой темы в разделе не существует"})
+	}
+
+	err = sectionService.DB.Transaction(func(tx *gorm.DB) error {
+		question := models.Question{
+			Text:    input.Text,
+			TopicID: input.TopicID,
+		}
+		if err := tx.Create(&question).Error; err != nil {
+			return err
+		}
+
+		for _, a := range input.Answers {
+			answer := models.Answer{
+				Text:       a.Text,
+				IsCorrect:  a.IsCorrect,
+				QuestionID: question.ID,
+			}
+			if err := tx.Create(&answer).Error; err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Не удалось сохранить вопрос и ответы"})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"message": "Вопрос успешно добавлен"})
+}
+
+func DeleteQuestion(c *fiber.Ctx) error {
+	idParam := c.Params("id")
+	questionID, err := strconv.ParseUint(idParam, 10, 64)
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"error": "Некорректный ID"})
+	}
+
+	err = sectionService.DeleteQuestion(uint(questionID))
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Ошибка при удалении"})
+	}
+
+	return c.JSON(fiber.Map{"message": "Вопрос удалён"})
 }

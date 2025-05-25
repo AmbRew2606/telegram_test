@@ -6,7 +6,7 @@ import "time"
 type Section struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
 	Name      string    `json:"name"`
-	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"` // автоматически заполняется
+	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"` 
 	Topics    []Topic   `gorm:"foreignKey:SectionID" json:"topics,omitempty"`
 }
 
@@ -25,7 +25,7 @@ type Question struct {
 	TopicID   uint      `json:"topic_id"`
 	Text      string    `json:"text"`
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
-	Answers   []Answer  `gorm:"foreignKey:QuestionID" json:"answers,omitempty"`
+	Answers   []Answer  `gorm:"foreignKey:QuestionID;constraint:OnDelete:CASCADE;" json:"answers,omitempty"`
 }
 
 // Модель Answer

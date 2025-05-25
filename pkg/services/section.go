@@ -139,9 +139,16 @@ func (s *SectionService) GetFilteredTopics(sectionID uint, filter string) ([]Top
 // 	return questions, nil
 // }
 
+// функия получения вопросов
+// функция принимает указатель на стукруту SectionService (структура подключения к БД)
+// функция называется GetQuestions и принимает ID раздела и ID темы с типом данных безнаковый Int (то есть без нуленй)
+// функция возвращает либо слайс модели, либо ошибку
 func (s *SectionService) GetQuestions(sectionID, topicID uint) ([]QuestionInfo, error) {
+
+	//инициализируем модель
 	var questions []QuestionInfo
 
+	//запрос
 	query := `
 	SELECT q.id, q.text
 	FROM questions q
@@ -162,4 +169,8 @@ func (s *SectionService) GetQuestions(sectionID, topicID uint) ([]QuestionInfo, 
 	}
 
 	return questions, nil
+}
+
+func (s *SectionService) DeleteQuestion(questionID uint) error {
+	return s.DB.Delete(&models.Question{}, questionID).Error
 }

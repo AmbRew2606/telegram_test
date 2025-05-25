@@ -12,4 +12,7 @@ func SetupRoutes(app *fiber.App) {
 	apiGroup.Get("/questions", GetQuestionsHandler)                   //  вопросы по sectionId и topicId
 
 	apiGroup.Post("/sections", CreateSection) // Создание раздела
+	apiGroup.Post("/questions", AddQuestionHandler)
+
+	app.Delete("/api/questions/:id", DeleteQuestion)
 }
